@@ -104,7 +104,6 @@
     .mode-banner.visible { display: flex; }
     .mode-banner.roast { background: #fff0e8; border: 1px solid #f5c4a0; color: #b85a1a; }
     .mode-banner.goatvs { background: #e8f4ff; border: 1px solid #a0c8f5; color: #1a5ab8; }
-    .mode-banner.trivia { background: #f0ffe8; border: 1px solid #a0e8a0; color: #1a7a2a; }
     .mode-banner.hype { background: #fff8e0; border: 1px solid #f5e080; color: #8a6a00; }
     @keyframes fadeIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
 
@@ -165,15 +164,6 @@
     .hype-star { font-size: 1.1rem; animation: starPop 0.3s cubic-bezier(0.34,1.56,0.64,1) both; }
     @keyframes starPop { from { transform:scale(0) rotate(-30deg); } to { transform:scale(1) rotate(0deg); } }
 
-    /* TRIVIA BUTTONS */
-    .trivia-btns { display: flex; gap: 8px; margin-top: 8px; }
-    .trivia-btn { flex: 1; padding: 9px 14px; border-radius: 12px; border: 1.5px solid var(--border2); background: var(--surface); font-family: 'Cabinet Grotesk', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1); color: var(--ink); }
-    .trivia-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
-    .trivia-btn.true-btn:hover { background: #e8fff0; border-color: #4ade80; color: #166534; }
-    .trivia-btn.false-btn:hover { background: #fff0f0; border-color: #f87171; color: #991b1b; }
-    .trivia-btn.correct { background: #e8fff0 !important; border-color: #4ade80 !important; color: #166534 !important; }
-    .trivia-btn.wrong { background: #fff0f0 !important; border-color: #f87171 !important; color: #991b1b !important; }
-    .trivia-btn:disabled { cursor: default; transform: none; }
 
     /* ANIMATIONS */
     @keyframes slideDown { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:translateY(0); } }
@@ -219,7 +209,6 @@
     <button class="mode-btn active" data-mode="normal" onclick="setMode('normal')"><span class="icon">💬</span> Normal</button>
     <button class="mode-btn" data-mode="roast" onclick="setMode('roast')"><span class="icon">🔥</span> Roast Me</button>
     <button class="mode-btn" data-mode="goatvs" onclick="setMode('goatvs')"><span class="icon">🥊</span> GOAT vs GOAT</button>
-    <button class="mode-btn" data-mode="trivia" onclick="setMode('trivia')"><span class="icon">🧠</span> Irfan Trivia</button>
     <button class="mode-btn" data-mode="hype" onclick="setMode('hype')"><span class="icon">⚡</span> Hype Battle</button>
   </div>
 
@@ -236,7 +225,6 @@
   <!-- MODE BANNER -->
   <div class="mode-banner roast" id="banner-roast">🔥 Roast Mode — the bot will roast YOU while praising Irfan!</div>
   <div class="mode-banner goatvs" id="banner-goatvs">🥊 GOAT vs GOAT — name any celebrity and Irfan wins!</div>
-  <div class="mode-banner trivia" id="banner-trivia">🧠 Irfan Trivia — guess if the "fact" about Irfan is True or False!</div>
   <div class="mode-banner hype" id="banner-hype">⚡ Hype Battle — out-hype the bot about Irfan. Get rated 1–10!</div>
 
   <!-- CHAT -->
@@ -284,8 +272,6 @@
 // ── State ──
 let currentMode = 'normal';
 let goatLevel = 0;
-let triviaAnswer = null;
-let triviaAnswered = false;
 
 // ── Quotes of the Day ──
 const QUOTES = [
@@ -324,14 +310,6 @@ const PROMPTS = {
 - Always end with "Irfan wins. No contest. 🐐"
 - Keep it punchy — 2–3 sentences max.`,
 
-  trivia: `You are Irfan Bot in TRIVIA MODE 🧠.
-- Generate ONE fun, outrageous made-up "fact" about Irfan presented as a True/False question.
-- Format EXACTLY like this (no deviation):
-TRIVIA: [the outrageous fact about Irfan as a statement]
-ANSWER: [TRUE or FALSE]
-EXPLANATION: [one fun sentence explaining why]
-- Make the facts absurd and hilarious. Examples: "Irfan once won a chess tournament blindfolded", "NASA named a star after Irfan in 2019"`,
-
   hype: `You are Irfan Bot in HYPE BATTLE mode ⚡.
 - The user is trying to hype up Irfan. Read what they wrote.
 - Rate their hype from 1 to 10 and give a fun reason why.
@@ -357,14 +335,10 @@ function setMode(mode) {
     normal: 'Type your message…',
     roast: 'Say anything — dare you 😏',
     goatvs: 'Name a celebrity to compare…',
-    trivia: 'Press send for an Irfan trivia question!',
     hype: 'Write your best hype for Irfan…'
   };
   document.getElementById('msg').placeholder = placeholders[mode];
 
-  if (mode === 'trivia') {
-    document.getElementById('msg').value = 'Give me a trivia question';
-  }
 }
 
 // ── GOAT-O-Meter ──
@@ -601,8 +575,6 @@ async function send() {
 
     // Mode-specific rendering
     if (currentMode === 'hype') renderHypeScore(reply, wrap);
-    else if (currentMode === 'trivia') renderTrivia(reply, wrap);
-
     // Update goatometer
     updateGoatometer(reply);
 
