@@ -1,475 +1,740 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Irfan GOAT Bot 🐐</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Cabinet+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
- 
+
     :root {
-      --bg: #0a0a0f;
-      --surface: #13131c;
-      --surface2: #1c1c2e;
-      --gold: #c9a84c;
-      --gold-light: #f0d080;
-      --gold-dim: rgba(201,168,76,0.15);
-      --white: #f5f0e8;
-      --muted: #6b6880;
-      --user-bubble: #1e1e32;
-      --bot-bubble: #161620;
-      --border: rgba(201,168,76,0.2);
-      --radius: 18px;
+      --bg:          #faf7f2;
+      --bg2:         #f3ede3;
+      --surface:     #ffffff;
+      --surface2:    #fdf9f4;
+      --amber:       #c17f3a;
+      --amber-deep:  #9a5f22;
+      --amber-light: #e8b96a;
+      --amber-pale:  rgba(193,127,58,0.10);
+      --amber-glow:  rgba(193,127,58,0.22);
+      --ink:         #2c2415;
+      --ink2:        #5a4a35;
+      --muted:       #a8967c;
+      --border:      rgba(193,127,58,0.18);
+      --border2:     rgba(193,127,58,0.32);
+      --user-bubble: #2c2415;
+      --bot-bubble:  #ffffff;
+      --shadow-sm:   0 2px 12px rgba(44,36,21,0.07);
+      --shadow-md:   0 8px 32px rgba(44,36,21,0.11);
+      --shadow-lg:   0 20px 60px rgba(44,36,21,0.14);
+      --radius:      20px;
+      --radius-sm:   12px;
     }
- 
+
     html, body {
-      height: 100%;
+      height: 100%; height: 100dvh;
       background: var(--bg);
-      font-family: 'DM Sans', sans-serif;
-      color: var(--white);
+      font-family: 'Cabinet Grotesk', sans-serif;
+      color: var(--ink);
       overflow: hidden;
     }
- 
-    /* Ambient background */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 60% 40% at 80% 10%, rgba(201,168,76,0.08) 0%, transparent 60%),
-        radial-gradient(ellipse 50% 50% at 10% 90%, rgba(120,80,200,0.07) 0%, transparent 60%);
-      pointer-events: none;
-      z-index: 0;
+
+    /* ── Animated mesh background ── */
+    .bg-canvas {
+      position: fixed; inset: 0; z-index: 0;
+      overflow: hidden; pointer-events: none;
     }
- 
-    /* Grain overlay */
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.5;
+
+    .bg-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.55;
+      animation: orbDrift 18s ease-in-out infinite alternate;
     }
- 
+
+    .bg-orb:nth-child(1) {
+      width: 520px; height: 520px;
+      background: radial-gradient(circle, #f5d99a 0%, #e8b86a00 70%);
+      top: -160px; right: -80px;
+      animation-duration: 20s;
+    }
+    .bg-orb:nth-child(2) {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, #fce4b8 0%, transparent 70%);
+      bottom: -100px; left: -80px;
+      animation-duration: 25s; animation-delay: -8s;
+    }
+    .bg-orb:nth-child(3) {
+      width: 280px; height: 280px;
+      background: radial-gradient(circle, #f8d49000 0%, #f0c06840 50%, transparent 70%);
+      top: 40%; left: 30%;
+      animation-duration: 30s; animation-delay: -4s;
+    }
+
+    @keyframes orbDrift {
+      0%   { transform: translate(0,0) scale(1); }
+      33%  { transform: translate(30px,-20px) scale(1.05); }
+      66%  { transform: translate(-15px,25px) scale(0.97); }
+      100% { transform: translate(20px,10px) scale(1.03); }
+    }
+
+    /* Subtle grid texture */
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(193,127,58,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(193,127,58,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    /* ── Shell ── */
     .shell {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      max-width: 780px;
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column;
+      height: 100%; height: 100dvh;
+      max-width: 800px;
       margin: 0 auto;
-      padding: 0 16px;
+      padding: 0 20px;
     }
- 
+
     /* ── Header ── */
     header {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 28px 0 20px;
+      display: flex; align-items: center; gap: 14px;
+      padding: 20px 0 18px;
       border-bottom: 1px solid var(--border);
-      animation: fadeDown 0.6s ease both;
-    }
- 
-    .logo-ring {
-      width: 48px; height: 48px;
-      border-radius: 50%;
-      border: 1.5px solid var(--gold);
-      display: grid; place-items: center;
-      font-size: 22px;
-      background: var(--gold-dim);
-      box-shadow: 0 0 20px rgba(201,168,76,0.2);
+      animation: slideDown 0.7s cubic-bezier(0.16,1,0.3,1) both;
       flex-shrink: 0;
     }
- 
-    .header-text h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.45rem;
-      font-weight: 900;
-      letter-spacing: -0.02em;
-      color: var(--white);
-      line-height: 1;
+
+    .logo-wrap {
+      position: relative; flex-shrink: 0;
     }
- 
-    .header-text span {
-      font-size: 0.72rem;
-      letter-spacing: 0.14em;
+
+    .logo-ring {
+      width: 50px; height: 50px;
+      border-radius: 50%;
+      border: 1.5px solid var(--amber-light);
+      display: grid; place-items: center;
+      font-size: 22px;
+      background: linear-gradient(135deg, #fff8ee, #ffecd0);
+      box-shadow: var(--shadow-sm), 0 0 0 4px var(--amber-pale);
+      position: relative; z-index: 1;
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    .logo-ring:hover { transform: scale(1.08) rotate(-5deg); }
+
+    /* Spinning ring around logo */
+    .logo-spinner {
+      position: absolute; inset: -6px;
+      border-radius: 50%;
+      border: 1.5px dashed var(--amber-light);
+      animation: spin 12s linear infinite;
+      opacity: 0.6;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .header-text { flex: 1; min-width: 0; }
+
+    .header-text h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.2rem, 4vw, 1.6rem);
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1;
+      letter-spacing: -0.01em;
+    }
+
+    .header-text h1 em {
+      font-style: italic;
+      color: var(--amber);
+    }
+
+    .header-text p {
+      font-size: clamp(0.6rem, 2vw, 0.7rem);
+      letter-spacing: 0.16em;
       text-transform: uppercase;
-      color: var(--gold);
+      color: var(--muted);
+      font-weight: 500;
+      margin-top: 3px;
+    }
+
+    .header-right {
+      display: flex; align-items: center; gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .status-pill {
+      display: flex; align-items: center; gap: 6px;
+      background: #edfff3;
+      border: 1px solid #a8e6be;
+      border-radius: 50px;
+      padding: 5px 12px 5px 8px;
+      font-size: 0.72rem;
+      color: #2d7a4f;
       font-weight: 500;
     }
- 
+
     .status-dot {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 0.75rem;
-      color: var(--muted);
-    }
- 
-    .dot {
       width: 7px; height: 7px;
       border-radius: 50%;
-      background: #4ade80;
-      box-shadow: 0 0 8px #4ade80;
+      background: #34d570;
+      box-shadow: 0 0 8px #34d570aa;
       animation: pulse 2s ease infinite;
     }
- 
+
     @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.85); }
     }
- 
+
     /* ── Chat area ── */
     .chat-area {
       flex: 1;
       overflow-y: auto;
-      padding: 28px 0;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
+      padding: 24px 0;
+      display: flex; flex-direction: column;
+      gap: 18px;
       scrollbar-width: thin;
       scrollbar-color: var(--border) transparent;
+      -webkit-overflow-scrolling: touch;
     }
- 
+
     .chat-area::-webkit-scrollbar { width: 4px; }
-    .chat-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
- 
-    /* Welcome state */
+    .chat-area::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+    /* ── Welcome screen ── */
     .welcome {
       margin: auto;
       text-align: center;
-      animation: fadeUp 0.8s ease both 0.2s;
+      padding: 24px 16px;
+      animation: welcomeIn 0.9s cubic-bezier(0.16,1,0.3,1) both 0.3s;
     }
- 
-    .welcome .goat-big { font-size: 4rem; display: block; margin-bottom: 16px; }
- 
+
+    @keyframes welcomeIn {
+      from { opacity: 0; transform: translateY(30px) scale(0.95); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .goat-crown {
+      position: relative; display: inline-block;
+      margin-bottom: 20px;
+    }
+
+    .goat-emoji {
+      font-size: clamp(3rem, 14vw, 5rem);
+      display: block;
+      animation: floatGoat 4s ease-in-out infinite;
+      filter: drop-shadow(0 8px 20px rgba(193,127,58,0.3));
+    }
+
+    @keyframes floatGoat {
+      0%, 100% { transform: translateY(0) rotate(-3deg); }
+      50%       { transform: translateY(-10px) rotate(3deg); }
+    }
+
+    /* Sparkles around goat */
+    .sparkle {
+      position: absolute;
+      font-size: 1rem;
+      animation: sparklePop 3s ease-in-out infinite;
+    }
+    .sparkle:nth-child(1) { top: 0; right: -10px; animation-delay: 0s; }
+    .sparkle:nth-child(2) { top: 10px; left: -14px; animation-delay: 0.8s; }
+    .sparkle:nth-child(3) { bottom: 0; right: 0; animation-delay: 1.6s; }
+
+    @keyframes sparklePop {
+      0%, 100% { transform: scale(0.6) rotate(0deg); opacity: 0.4; }
+      50%       { transform: scale(1.2) rotate(20deg); opacity: 1; }
+    }
+
     .welcome h2 {
-      font-family: 'Playfair Display', serif;
-      font-size: 2rem;
-      font-weight: 900;
-      background: linear-gradient(135deg, var(--gold-light), var(--gold));
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.6rem, 7vw, 2.4rem);
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 10px;
+      line-height: 1.1;
+    }
+
+    .welcome h2 span {
+      background: linear-gradient(135deg, var(--amber), var(--amber-deep));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      margin-bottom: 10px;
     }
- 
+
     .welcome p {
-      color: var(--muted);
-      font-size: 0.9rem;
+      color: var(--ink2);
+      font-size: clamp(0.82rem, 3vw, 0.95rem);
       max-width: 300px;
-      margin: 0 auto;
-      line-height: 1.6;
+      margin: 0 auto 28px;
+      line-height: 1.65;
     }
- 
-    /* Message bubbles */
+
+    /* Suggested prompts */
+    .prompts {
+      display: flex; flex-wrap: wrap;
+      gap: 8px; justify-content: center;
+    }
+
+    .prompt-chip {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 50px;
+      padding: 8px 16px;
+      font-size: 0.8rem;
+      color: var(--ink2);
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+      font-family: 'Cabinet Grotesk', sans-serif;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .prompt-chip:hover {
+      background: var(--amber);
+      color: white;
+      border-color: var(--amber);
+      transform: translateY(-2px) scale(1.04);
+      box-shadow: var(--shadow-md);
+    }
+
+    /* ── Messages ── */
     .msg-row {
-      display: flex;
-      gap: 12px;
-      animation: fadeUp 0.35s ease both;
+      display: flex; gap: 10px;
+      animation: msgIn 0.4s cubic-bezier(0.16,1,0.3,1) both;
     }
- 
+
+    @keyframes msgIn {
+      from { opacity: 0; transform: translateY(16px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
     .msg-row.user { flex-direction: row-reverse; }
- 
+
     .avatar {
       width: 34px; height: 34px;
       border-radius: 50%;
       flex-shrink: 0;
       display: grid; place-items: center;
       font-size: 15px;
-      border: 1px solid var(--border);
+      border: 1.5px solid var(--border);
+      box-shadow: var(--shadow-sm);
     }
- 
-    .avatar.bot { background: var(--gold-dim); border-color: var(--gold); }
-    .avatar.user-av { background: var(--surface2); }
- 
+
+    .avatar.bot {
+      background: linear-gradient(135deg, #fff8ee, #ffecd0);
+      border-color: var(--amber-light);
+    }
+
+    .avatar.user-av {
+      background: var(--user-bubble);
+      border-color: transparent;
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'Cabinet Grotesk', sans-serif;
+    }
+
+    @media (max-width: 380px) { .avatar { display: none; } }
+
+    .bubble-wrap { display: flex; flex-direction: column; gap: 4px; max-width: min(76%, 520px); }
+    .msg-row.user .bubble-wrap { align-items: flex-end; }
+
     .bubble {
-      max-width: 72%;
-      padding: 13px 18px;
+      padding: 12px 17px;
       border-radius: var(--radius);
-      font-size: 0.92rem;
+      font-size: clamp(0.84rem, 3.5vw, 0.93rem);
       line-height: 1.65;
+      word-break: break-word;
       position: relative;
+      transition: transform 0.15s ease;
     }
- 
+
+    .bubble:hover { transform: translateY(-1px); }
+
     .msg-row.bot .bubble {
       background: var(--bot-bubble);
       border: 1px solid var(--border);
-      border-top-left-radius: 4px;
-      color: var(--white);
+      border-top-left-radius: 5px;
+      color: var(--ink);
+      box-shadow: var(--shadow-sm);
     }
- 
+
     .msg-row.user .bubble {
-      background: linear-gradient(135deg, #2a2a4a, var(--user-bubble));
-      border: 1px solid rgba(120,100,220,0.25);
-      border-top-right-radius: 4px;
-      color: var(--white);
+      background: linear-gradient(135deg, #3a2e1f, var(--user-bubble));
+      border-top-right-radius: 5px;
+      color: #faf4ea;
+      box-shadow: var(--shadow-md);
     }
- 
+
+    .msg-time {
+      font-size: 0.65rem;
+      color: var(--muted);
+      padding: 0 4px;
+    }
+
     /* Typing indicator */
     .typing-bubble {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      padding: 14px 18px;
+      display: flex; align-items: center; gap: 5px;
+      padding: 16px 20px;
     }
- 
+
     .typing-bubble span {
       width: 7px; height: 7px;
       border-radius: 50%;
-      background: var(--gold);
-      animation: bounce 1.2s ease infinite;
+      background: var(--amber);
+      animation: typingBounce 1.3s ease infinite;
     }
- 
-    .typing-bubble span:nth-child(2) { animation-delay: 0.2s; }
-    .typing-bubble span:nth-child(3) { animation-delay: 0.4s; }
- 
-    @keyframes bounce {
-      0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
-      40% { transform: translateY(-6px); opacity: 1; }
+
+    .typing-bubble span:nth-child(2) { animation-delay: 0.18s; }
+    .typing-bubble span:nth-child(3) { animation-delay: 0.36s; }
+
+    @keyframes typingBounce {
+      0%, 70%, 100% { transform: translateY(0); opacity: 0.35; }
+      35%            { transform: translateY(-7px); opacity: 1; }
     }
- 
+
     /* ── Input bar ── */
-    .input-bar {
-      padding: 18px 0 26px;
+    .input-section {
+      flex-shrink: 0;
+      padding: 14px 0;
+      padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
       border-top: 1px solid var(--border);
-      animation: fadeUp 0.6s ease both 0.3s;
+      animation: slideUp 0.7s cubic-bezier(0.16,1,0.3,1) both 0.15s;
     }
- 
-    .input-wrap {
-      display: flex;
-      gap: 10px;
-      align-items: center;
+
+    .input-card {
       background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 50px;
-      padding: 8px 8px 8px 22px;
+      border: 1.5px solid var(--border);
+      border-radius: 28px;
+      box-shadow: var(--shadow-md);
+      padding: 8px 8px 8px 20px;
+      display: flex; align-items: center; gap: 10px;
       transition: border-color 0.25s, box-shadow 0.25s;
+      position: relative;
+      overflow: hidden;
     }
- 
-    .input-wrap:focus-within {
-      border-color: var(--gold);
-      box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+
+    /* Shimmer effect on focus */
+    .input-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(193,127,58,0.05), transparent);
+      transform: translateX(-100%);
+      transition: transform 0s;
     }
- 
+
+    .input-card:focus-within::before {
+      transform: translateX(100%);
+      transition: transform 0.6s ease;
+    }
+
+    .input-card:focus-within {
+      border-color: var(--amber);
+      box-shadow: var(--shadow-md), 0 0 0 3px var(--amber-pale);
+    }
+
     #msg {
-      flex: 1;
-      background: transparent;
-      border: none;
-      outline: none;
-      color: var(--white);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.92rem;
-      caret-color: var(--gold);
+      flex: 1; min-width: 0;
+      background: transparent; border: none; outline: none;
+      color: var(--ink);
+      font-family: 'Cabinet Grotesk', sans-serif;
+      font-size: clamp(0.87rem, 4vw, 0.95rem);
+      caret-color: var(--amber);
     }
- 
+
     #msg::placeholder { color: var(--muted); }
- 
     #msg:disabled { opacity: 0.5; }
- 
+
     .send-btn {
-      width: 42px; height: 42px;
-      border-radius: 50%;
-      border: none;
-      background: linear-gradient(135deg, var(--gold), #a07030);
-      color: #0a0a0f;
+      width: 44px; height: 44px;
+      border-radius: 50%; border: none;
+      background: linear-gradient(135deg, var(--amber-light), var(--amber-deep));
+      color: white;
       cursor: pointer;
       display: grid; place-items: center;
       flex-shrink: 0;
-      transition: transform 0.15s, opacity 0.15s, box-shadow 0.2s;
-      box-shadow: 0 4px 16px rgba(201,168,76,0.3);
+      transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s;
+      box-shadow: 0 4px 18px var(--amber-glow);
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      position: relative; overflow: hidden;
     }
- 
+
+    /* Ripple on send */
+    .send-btn::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%);
+      transform: scale(0); opacity: 0;
+      transition: transform 0.3s, opacity 0.3s;
+      border-radius: 50%;
+    }
+
+    .send-btn:active::after { transform: scale(2.5); opacity: 1; transition: none; }
+
     .send-btn:hover:not(:disabled) {
-      transform: scale(1.08);
-      box-shadow: 0 6px 22px rgba(201,168,76,0.45);
+      transform: scale(1.1) rotate(5deg);
+      box-shadow: 0 8px 28px var(--amber-glow);
     }
- 
-    .send-btn:active:not(:disabled) { transform: scale(0.95); }
-    .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
- 
+
+    .send-btn:active:not(:disabled) { transform: scale(0.93); }
+    .send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
     .send-btn svg { width: 18px; height: 18px; fill: currentColor; }
- 
-    .hint {
-      text-align: center;
-      margin-top: 10px;
-      font-size: 0.7rem;
-      color: var(--muted);
+
+    .input-footer {
+      display: flex; align-items: center; justify-content: center;
+      gap: 6px; margin-top: 10px;
+    }
+
+    .input-footer span {
+      font-size: 0.68rem; color: var(--muted);
       letter-spacing: 0.05em;
     }
- 
-    /* Animations */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(14px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
- 
-    @keyframes fadeDown {
-      from { opacity: 0; transform: translateY(-10px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
- 
-    /* Divider */
-    .date-divider {
-      text-align: center;
-      font-size: 0.68rem;
-      letter-spacing: 0.1em;
+
+    .footer-badge {
+      background: var(--amber-pale);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px 7px;
+      font-size: 0.62rem;
+      color: var(--amber-deep);
+      font-weight: 700;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      color: var(--muted);
-      display: flex;
-      align-items: center;
-      gap: 10px;
     }
- 
+
+    @media (max-width: 360px) { .input-footer { display: none; } }
+
+    /* ── Divider ── */
+    .date-divider {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 0.67rem; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted);
+      flex-shrink: 0;
+    }
+
     .date-divider::before, .date-divider::after {
-      content: '';
-      flex: 1;
+      content: ''; flex: 1;
       height: 1px;
-      background: var(--border);
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+    }
+
+    /* ── Animations ── */
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Desktop */
+    @media (min-width: 600px) {
+      .shell { padding: 0 28px; }
+      header { padding: 26px 0 22px; }
+      .logo-ring { width: 54px; height: 54px; font-size: 24px; }
+      .chat-area { gap: 22px; padding: 30px 0; }
+      .bubble { padding: 14px 20px; }
+      .input-section { padding: 20px 0 28px; }
+      .send-btn { width: 46px; height: 46px; }
     }
   </style>
 </head>
 <body>
+
+<div class="bg-canvas">
+  <div class="bg-orb"></div>
+  <div class="bg-orb"></div>
+  <div class="bg-orb"></div>
+</div>
+<div class="bg-grid"></div>
+
 <div class="shell">
- 
+
   <!-- Header -->
   <header>
-    <div class="logo-ring">🐐</div>
-    <div class="header-text">
-      <h1>Irfan Bot</h1>
-      <span>The GOAT Intelligence</span>
+    <div class="logo-wrap">
+      <div class="logo-spinner"></div>
+      <div class="logo-ring">🐐</div>
     </div>
-    <div class="status-dot">
-      <div class="dot"></div>
-      Online
+    <div class="header-text">
+      <h1>Irfan <em>Bot</em></h1>
+      <p>The GOAT Intelligence · Est. 2025</p>
+    </div>
+    <div class="header-right">
+      <div class="status-pill">
+        <div class="status-dot"></div>
+        Online
+      </div>
     </div>
   </header>
- 
+
   <!-- Chat -->
   <div class="chat-area" id="chat">
     <div class="date-divider">Today</div>
     <div class="welcome" id="welcome">
-      <span class="goat-big">🐐</span>
-      <h2>Ask Anything</h2>
-      <p>Powered by the legendary Irfan — the one and only GOAT. What do you want to know?</p>
+      <div class="goat-crown">
+        <span class="sparkle">✦</span>
+        <span class="sparkle">★</span>
+        <span class="sparkle">✦</span>
+        <span class="goat-emoji">🐐</span>
+      </div>
+      <h2>Ask <span>Anything</span></h2>
+      <p>Powered by the legendary Irfan — the one and only GOAT. Seek wisdom below.</p>
+      <div class="prompts">
+        <button class="prompt-chip" onclick="usePrompt(this)">Who is the GOAT? 🏆</button>
+        <button class="prompt-chip" onclick="usePrompt(this)">Tell me about Irfan 🐐</button>
+        <button class="prompt-chip" onclick="usePrompt(this)">Rate Irfan out of 10 ⭐</button>
+        <button class="prompt-chip" onclick="usePrompt(this)">Why is Irfan legendary? 👑</button>
+      </div>
     </div>
   </div>
- 
+
   <!-- Input -->
-  <div class="input-bar">
-    <div class="input-wrap">
-      <input id="msg" placeholder="Type your message…" autocomplete="off" />
+  <div class="input-section">
+    <div class="input-card">
+      <input id="msg" placeholder="Ask about the GOAT…" autocomplete="off"/>
       <button class="send-btn" id="sendBtn" onclick="send()">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-        </svg>
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
       </button>
     </div>
-    <p class="hint">Press Enter to send &nbsp;·&nbsp; Powered by Groq × Llama 3</p>
+    <div class="input-footer">
+      <span>Press Enter to send</span>
+      <div class="footer-badge">Groq × Llama 3</div>
+    </div>
   </div>
- 
+
 </div>
- 
+
 <script>
-  const chat = document.getElementById("chat");
+  const chat  = document.getElementById("chat");
   const input = document.getElementById("msg");
   const btn   = document.getElementById("sendBtn");
- 
-  // Enter key support
+
   input.addEventListener("keydown", e => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
   });
- 
+
+  function usePrompt(el) {
+    input.value = el.textContent.replace(/[🏆🐐⭐👑]/g, '').trim();
+    input.focus();
+    send();
+  }
+
   function removeWelcome() {
     const w = document.getElementById("welcome");
-    if (w) w.remove();
+    if (w) {
+      w.style.animation = "none";
+      w.style.transition = "opacity 0.3s, transform 0.3s";
+      w.style.opacity = "0";
+      w.style.transform = "scale(0.95)";
+      setTimeout(() => w.remove(), 300);
+    }
   }
- 
+
+  function getTime() {
+    return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
   function appendMessage(role, text) {
     removeWelcome();
     const row = document.createElement("div");
     row.className = `msg-row ${role}`;
- 
+
     const avatar = document.createElement("div");
     avatar.className = `avatar ${role === "bot" ? "bot" : "user-av"}`;
-    avatar.textContent = role === "bot" ? "🐐" : "👤";
- 
+    avatar.textContent = role === "bot" ? "🐐" : "I";
+
+    const wrap = document.createElement("div");
+    wrap.className = "bubble-wrap";
+
     const bubble = document.createElement("div");
     bubble.className = "bubble";
     bubble.textContent = text;
- 
+
+    const time = document.createElement("div");
+    time.className = "msg-time";
+    time.textContent = getTime();
+
+    wrap.appendChild(bubble);
+    wrap.appendChild(time);
     row.appendChild(avatar);
-    row.appendChild(bubble);
+    row.appendChild(wrap);
     chat.appendChild(row);
-    chat.scrollTop = chat.scrollHeight;
+
+    requestAnimationFrame(() => { chat.scrollTop = chat.scrollHeight; });
     return bubble;
   }
- 
+
   function showTyping() {
     removeWelcome();
     const row = document.createElement("div");
     row.className = "msg-row bot";
     row.id = "typing-row";
- 
+
     const avatar = document.createElement("div");
     avatar.className = "avatar bot";
     avatar.textContent = "🐐";
- 
+
+    const wrap = document.createElement("div");
+    wrap.className = "bubble-wrap";
+
     const bubble = document.createElement("div");
     bubble.className = "bubble typing-bubble";
     bubble.innerHTML = "<span></span><span></span><span></span>";
- 
+
+    wrap.appendChild(bubble);
     row.appendChild(avatar);
-    row.appendChild(bubble);
+    row.appendChild(wrap);
     chat.appendChild(row);
     chat.scrollTop = chat.scrollHeight;
   }
- 
+
   function removeTyping() {
     const t = document.getElementById("typing-row");
     if (t) t.remove();
   }
- 
+
   function setLoading(on) {
     btn.disabled = on;
     input.disabled = on;
   }
- 
+
   async function send() {
     const msg = input.value.trim();
     if (!msg) return;
- 
+
     appendMessage("user", msg);
     input.value = "";
     setLoading(true);
     showTyping();
- 
+
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: msg })
       });
- 
+
       removeTyping();
- 
       if (!res.ok) throw new Error("Server error");
- 
+
       const data = await res.json();
       appendMessage("bot", data.reply);
- 
+
     } catch (err) {
       removeTyping();
       appendMessage("bot", "⚠️ Could not reach the server. Make sure Flask is running.");
       console.error(err);
     }
- 
+
     setLoading(false);
     input.focus();
   }
