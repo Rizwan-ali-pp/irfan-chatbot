@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Irfan GOAT Bot 🐐</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+    :root {
+      --bg: #0a0a0f;
+      --surface: #13131c;
+      --surface2: #1c1c2e;
+      --gold: #c9a84c;
+      --gold-light: #f0d080;
+      --gold-dim: rgba(201,168,76,0.15);
+      --white: #f5f0e8;
+      --muted: #6b6880;
+      --user-bubble: #1e1e32;
+      --bot-bubble: #161620;
+      --border: rgba(201,168,76,0.2);
+      --radius: 18px;
+    }
+ 
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      font-family: 'DM Sans', sans-serif;
+      color: var(--white);
+      overflow: hidden;
+    }
+ 
+    /* Ambient background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 80% 10%, rgba(201,168,76,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 50% at 10% 90%, rgba(120,80,200,0.07) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+ 
+    /* Grain overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.5;
+    }
+ 
+    .shell {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+ 
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 28px 0 20px;
+      border-bottom: 1px solid var(--border);
+      animation: fadeDown 0.6s ease both;
+    }
+ 
+    .logo-ring {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      border: 1.5px solid var(--gold);
+      display: grid; place-items: center;
+      font-size: 22px;
+      background: var(--gold-dim);
+      box-shadow: 0 0 20px rgba(201,168,76,0.2);
+      flex-shrink: 0;
+    }
+ 
+    .header-text h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.45rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      color: var(--white);
+      line-height: 1;
+    }
+ 
+    .header-text span {
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 500;
+    }
+ 
+    .status-dot {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+ 
+    .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #4ade80;
+      box-shadow: 0 0 8px #4ade80;
+      animation: pulse 2s ease infinite;
+    }
+ 
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+ 
+    /* ── Chat area ── */
+    .chat-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+ 
+    .chat-area::-webkit-scrollbar { width: 4px; }
+    .chat-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+ 
+    /* Welcome state */
+    .welcome {
+      margin: auto;
+      text-align: center;
+      animation: fadeUp 0.8s ease both 0.2s;
+    }
+ 
+    .welcome .goat-big { font-size: 4rem; display: block; margin-bottom: 16px; }
+ 
+    .welcome h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+ 
+    .welcome p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      max-width: 300px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+ 
+    /* Message bubbles */
+    .msg-row {
+      display: flex;
+      gap: 12px;
+      animation: fadeUp 0.35s ease both;
+    }
+ 
+    .msg-row.user { flex-direction: row-reverse; }
+ 
+    .avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: grid; place-items: center;
+      font-size: 15px;
+      border: 1px solid var(--border);
+    }
+ 
+    .avatar.bot { background: var(--gold-dim); border-color: var(--gold); }
+    .avatar.user-av { background: var(--surface2); }
+ 
+    .bubble {
+      max-width: 72%;
+      padding: 13px 18px;
+      border-radius: var(--radius);
+      font-size: 0.92rem;
+      line-height: 1.65;
+      position: relative;
+    }
+ 
+    .msg-row.bot .bubble {
+      background: var(--bot-bubble);
+      border: 1px solid var(--border);
+      border-top-left-radius: 4px;
+      color: var(--white);
+    }
+ 
+    .msg-row.user .bubble {
+      background: linear-gradient(135deg, #2a2a4a, var(--user-bubble));
+      border: 1px solid rgba(120,100,220,0.25);
+      border-top-right-radius: 4px;
+      color: var(--white);
+    }
+ 
+    /* Typing indicator */
+    .typing-bubble {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 14px 18px;
+    }
+ 
+    .typing-bubble span {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--gold);
+      animation: bounce 1.2s ease infinite;
+    }
+ 
+    .typing-bubble span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-bubble span:nth-child(3) { animation-delay: 0.4s; }
+ 
+    @keyframes bounce {
+      0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+      40% { transform: translateY(-6px); opacity: 1; }
+    }
+ 
+    /* ── Input bar ── */
+    .input-bar {
+      padding: 18px 0 26px;
+      border-top: 1px solid var(--border);
+      animation: fadeUp 0.6s ease both 0.3s;
+    }
+ 
+    .input-wrap {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      padding: 8px 8px 8px 22px;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+ 
+    .input-wrap:focus-within {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+    }
+ 
+    #msg {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      caret-color: var(--gold);
+    }
+ 
+    #msg::placeholder { color: var(--muted); }
+ 
+    #msg:disabled { opacity: 0.5; }
+ 
+    .send-btn {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, var(--gold), #a07030);
+      color: #0a0a0f;
+      cursor: pointer;
+      display: grid; place-items: center;
+      flex-shrink: 0;
+      transition: transform 0.15s, opacity 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 16px rgba(201,168,76,0.3);
+    }
+ 
+    .send-btn:hover:not(:disabled) {
+      transform: scale(1.08);
+      box-shadow: 0 6px 22px rgba(201,168,76,0.45);
+    }
+ 
+    .send-btn:active:not(:disabled) { transform: scale(0.95); }
+    .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+ 
+    .send-btn svg { width: 18px; height: 18px; fill: currentColor; }
+ 
+    .hint {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+ 
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+ 
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+ 
+    /* Divider */
+    .date-divider {
+      text-align: center;
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+ 
+    .date-divider::before, .date-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+ 
+  <!-- Header -->
+  <header>
+    <div class="logo-ring">🐐</div>
+    <div class="header-text">
+      <h1>Irfan Bot</h1>
+      <span>The GOAT Intelligence</span>
+    </div>
+    <div class="status-dot">
+      <div class="dot"></div>
+      Online
+    </div>
+  </header>
+ 
+  <!-- Chat -->
+  <div class="chat-area" id="chat">
+    <div class="date-divider">Today</div>
+    <div class="welcome" id="welcome">
+      <span class="goat-big">🐐</span>
+      <h2>Ask Anything</h2>
+      <p>Powered by the legendary Irfan — the one and only GOAT. What do you want to know?</p>
+    </div>
+  </div>
+ 
+  <!-- Input -->
+  <div class="input-bar">
+    <div class="input-wrap">
+      <input id="msg" placeholder="Type your message…" autocomplete="off" />
+      <button class="send-btn" id="sendBtn" onclick="send()">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+        </svg>
+      </button>
+    </div>
+    <p class="hint">Press Enter to send &nbsp;·&nbsp; Powered by Groq × Llama 3</p>
+  </div>
+ 
+</div>
+ 
+<script>
+  const chat = document.getElementById("chat");
+  const input = document.getElementById("msg");
+  const btn   = document.getElementById("sendBtn");
+ 
+  // Enter key support
+  input.addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+  });
+ 
+  function removeWelcome() {
+    const w = document.getElementById("welcome");
+    if (w) w.remove();
+  }
+ 
+  function appendMessage(role, text) {
+    removeWelcome();
+    const row = document.createElement("div");
+    row.className = `msg-row ${role}`;
+ 
+    const avatar = document.createElement("div");
+    avatar.className = `avatar ${role === "bot" ? "bot" : "user-av"}`;
+    avatar.textContent = role === "bot" ? "🐐" : "👤";
+ 
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+    bubble.textContent = text;
+ 
+    row.appendChild(avatar);
+    row.appendChild(bubble);
+    chat.appendChild(row);
+    chat.scrollTop = chat.scrollHeight;
+    return bubble;
+  }
+ 
+  function showTyping() {
+    removeWelcome();
+    const row = document.createElement("div");
+    row.className = "msg-row bot";
+    row.id = "typing-row";
+ 
+    const avatar = document.createElement("div");
+    avatar.className = "avatar bot";
+    avatar.textContent = "🐐";
+ 
+    const bubble = document.createElement("div");
+    bubble.className = "bubble typing-bubble";
+    bubble.innerHTML = "<span></span><span></span><span></span>";
+ 
+    row.appendChild(avatar);
+    row.appendChild(bubble);
+    chat.appendChild(row);
+    chat.scrollTop = chat.scrollHeight;
+  }
+ 
+  function removeTyping() {
+    const t = document.getElementById("typing-row");
+    if (t) t.remove();
+  }
+ 
+  function setLoading(on) {
+    btn.disabled = on;
+    input.disabled = on;
+  }
+ 
+  async function send() {
+    const msg = input.value.trim();
+    if (!msg) return;
+ 
+    appendMessage("user", msg);
+    input.value = "";
+    setLoading(true);
+    showTyping();
+ 
+    try {
+      const res = await fetch("http://127.0.0.1:5000/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg })
+      });
+ 
+      removeTyping();
+ 
+      if (!res.ok) throw new Error("Server error");
+ 
+      const data = await res.json();
+      appendMessage("bot", data.reply);
+ 
+    } catch (err) {
+      removeTyping();
+      appendMessage("bot", "⚠️ Could not reach the server. Make sure Flask is running.");
+      console.error(err);
+    }
+ 
+    setLoading(false);
+    input.focus();
+  }
+</script>
+</body>
+</html>
